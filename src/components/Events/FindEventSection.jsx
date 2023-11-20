@@ -9,10 +9,15 @@ export default function FindEventSection() {
   const searchElement = useRef();
   const [searchTerm, setSearchTerm] = useState();
 
-  const { data, isPending, isError, error } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ["events", { search: searchTerm }],
     // queryFn wraps fn with {queryKey: Array(1), meta: undefined}
     queryFn: ({ signal }) => fetchEvents({ signal, searchTerm }), // must pass {name}, so that it can be received and destructured as 'fetchEvents({signal, searchTerm})'
+
+    // disabling req if no search is entered
+    //enabled: false,
+    // if query is disabled, react treats it as isPending, so better to use isLoading, which will not be true if query is disabled
+    enabled: searchTerm !== undefined, // true or false
   });
 
   function handleSubmit(event) {
@@ -22,7 +27,7 @@ export default function FindEventSection() {
 
   let content = <p>Please enter a search term and to find events.</p>;
 
-  if (isPending) {
+  if (isLoading) {
     content = <LoadingIndicator />;
   }
 
