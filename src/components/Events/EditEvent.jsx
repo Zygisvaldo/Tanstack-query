@@ -38,6 +38,10 @@ export default function EditEvent() {
     onError: (error, data, context) => {
       queryClient.setQueryData(["events", eventId], context.prevEvent);
     },
+    // onSettled will be called after mutation is done, no matter success or fail
+    onSettled: () => {
+      queryClient.invalidateQueries(["events", eventId]);
+    },
   });
 
   function handleSubmit(formData) {
