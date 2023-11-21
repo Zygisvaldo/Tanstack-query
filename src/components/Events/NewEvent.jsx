@@ -15,7 +15,7 @@ export default function NewEvent() {
   });
 
   function handleSubmit(formData) {
-    mutate({ event: formData });
+    mutate({ event: formData }); // mutate calls a mutationFn, so when we register we dont need to call it to pass args, we call it with 'mutate'
   }
 
   return (
@@ -33,7 +33,12 @@ export default function NewEvent() {
           </>
         )}
       </EventForm>
-      {isError && <ErrorBlock title='Failed to create event' message={error.info?.message || 'Try again later!'}/>}
+      {isError && (
+        <ErrorBlock
+          title="Failed to create event"
+          message={error.info?.message || "Try again later!"}
+        />
+      )}
     </Modal>
   );
 }
