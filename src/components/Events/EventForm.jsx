@@ -4,6 +4,7 @@ import ImagePicker from "../ImagePicker.jsx";
 import { useQuery } from "@tanstack/react-query";
 import { fetchSelectableImages } from "../../util/http.js";
 import ErrorBlock from "../UI/ErrorBlock.jsx";
+import { Form } from "react-router-dom";
 
 export default function EventForm({ inputData, onSubmit, children }) {
   const [selectedImage, setSelectedImage] = useState(inputData?.image);
@@ -32,7 +33,7 @@ export default function EventForm({ inputData, onSubmit, children }) {
   }
 
   return (
-    <form id="event-form" onSubmit={handleSubmit}>
+    <Form id="event-form" onSubmit={handleSubmit}>
       <p className="control">
         <label htmlFor="title">Title</label>
         <input
@@ -103,6 +104,6 @@ export default function EventForm({ inputData, onSubmit, children }) {
       </p>
 
       <p className="form-actions">{children}</p>
-    </form>
+    </Form>
   );
 }
