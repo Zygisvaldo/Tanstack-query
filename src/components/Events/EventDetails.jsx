@@ -5,8 +5,12 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { deleteEvent, fetchEvent, queryClient } from "../../util/http.js";
 import ErrorBlock from "../UI/ErrorBlock.jsx";
 import LoadingIndicator from "../UI/LoadingIndicator.jsx";
+import { useState } from "react";
+import Modal from "../UI/Modal.jsx";
 
 export default function EventDetails() {
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const navigate = useNavigate();
   const params = useParams();
   const eventId = params.id;
@@ -14,7 +18,7 @@ export default function EventDetails() {
   const {
     data: eventDetails,
     isPending: eventDetailsPending,
-    isError: eventDetailsError,
+    isError: isErrorEvent,
     error: eventError,
   } = useQuery({
     queryKey: ["events", eventId],
@@ -22,22 +26,35 @@ export default function EventDetails() {
   });
 
   const {
-    isError: deleteEventError,
+    isError: isErrorDeleting,
     error: deleteError,
+    isPending: isPendingDeletion,
     mutate,
   } = useMutation({
     mutationKey: ["eventDelete"],
     mutationFn: deleteEvent,
     onSuccess: () => {
+      setIsDeleting(false);
       navigate("/events");
     },
   });
 
   function handleEventDelete() {
     // because event was deleted, trigger refetch
-    queryClient.invalidateQueries({ queryKey: ["events"] });
+    queryClient.invalidateQueries({
+      queryKey: ["events"],
+      refetchType: "none",
+    }); // refetchType: 'none' => will not refetch existing queries until page is loaded again, so that right after deletion it would not try to fecth eventDetails again
     //window.alert("Do you really want to delete?");
     mutate({ id: eventId });
+  }
+
+  function handleStartDelete() {
+    setIsDeleting(true);
+  }
+
+  function handleStopDelete() {
+    setIsDeleting(false);
   }
 
   let content;
@@ -50,20 +67,11 @@ export default function EventDetails() {
     );
   }
 
-  if (eventDetailsError) {
+  if (isErrorEvent) {
     content = (
       <ErrorBlock
         title="Error occured!"
         message={eventError.info?.message || "Failed to get event details!"}
-      />
-    );
-  }
-
-  if (deleteEventError) {
-    content = (
-      <ErrorBlock
-        title="Error occured!"
-        message={deleteError.info?.message || "Failed to get event details!"}
       />
     );
   }
@@ -82,7 +90,7 @@ export default function EventDetails() {
         <header>
           <h1>{eventDetails.title}</h1>
           <nav>
-            <button onClick={handleEventDelete}>Delete</button>
+            <button onClick={handleStartDelete}>Delete</button>
             <Link to="edit">Edit</Link>
           </nav>
         </header>
@@ -107,6 +115,32 @@ export default function EventDetails() {
 
   return (
     <>
+      {isDeleting && (
+        <Modal onClose={handleStopDelete}>
+          <div>
+            <p>Are you sure?</p>
+            <div className="form-actions">
+              {isPendingDeletion && <p>Deleting... Please wait!</p>}
+              {!isPendingDeletion && (
+                <>
+                  <button onClick={handleStopDelete} className="button-text">
+                    Close
+                  </button>
+                  <button onClick={handleEventDelete} className="button">
+                    Delete
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+          {isErrorDeleting && (
+            <ErrorBlock
+              title="Error deleting event!"
+              message={deleteError.info?.message || "Failed to delete event!"}
+            />
+          )}
+        </Modal>
+      )}
       <Outlet />
       <Header>
         <Link to="/events" className="nav-item">

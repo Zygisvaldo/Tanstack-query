@@ -89,8 +89,6 @@ export async function deleteEvent({ id }) {
     method: "DELETE",
   });
 
-  console.log(response);
-
   if (!response.ok) {
     const error = new Error("An error occurred while deleting the event");
     error.code = response.status;
