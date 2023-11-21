@@ -1,3 +1,7 @@
+import { QueryClient } from "@tanstack/react-query";
+
+export const queryClient = new QueryClient();
+
 export async function fetchEvents({ signal, searchTerm }) {
   console.log(searchTerm); // {queryKey: Array(1), meta: undefined} and actual input value. Its because react wraps queryFn with some data {}
   let url = "http://localhost:3000/events";
